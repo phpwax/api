@@ -1,0 +1,8 @@
+<count><?=count($model)?></count>
+<results>
+  <?foreach($model as $row):?>
+    <result>
+      <?=partial("model", array("row"=>$row, "recurse"=>true), "xml")?>
+    </result>
+  <?endforeach?>
+</results>

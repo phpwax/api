@@ -62,6 +62,9 @@ class BaseApiController extends WaxController{
       else $model = $model->all();
     }
     
+    if($id) $this->model = new WaxRecordset($model, array($model->row));
+    else $this->model = $model;
+    
     if($this->output_format == "json") $this->output_obj = $this->convert_to_std_class($model);
   }
   
