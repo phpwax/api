@@ -95,13 +95,13 @@ class BaseApiController extends WaxController{
     if($model instanceof WaxModel){
       foreach($model->columns as $col_name => $col_data){
         $data = $model->$col_name;
-        if($data instanceof WaxModel || $data instanceof WaxRecordset) $ret->$col_name = $this->prepare_json($data);
+        if($data instanceof WaxModel || $data instanceof WaxRecordset) $ret->$col_name = $this->convert_to_std_class($data);
         else $ret->$col_name = $data;
       }
     }elseif($model instanceof WaxRecordset){
       $ret->count = $model->count();
       $ret->results = array();
-      foreach($model as $row) $ret->results[] = $this->prepare_json($row);
+      foreach($model as $row) $ret->results[] = $this->convert_to_std_class($row);
     }
     return $ret;
   }
