@@ -1,8 +1,20 @@
-<count><?=count($model)?></count>
-<results>
-  <?foreach($model as $row):?>
-    <result>
-      <?=partial("model", array("row"=>$row, "recurse"=>true), "xml")?>
-    </result>
+<?if($errors):?>
+  <errors>
+  <?foreach($errors as $error):?>
+    <error>
+      <?foreach($error as $k => $v):?>
+        <<?=$k?>><?=$v?></<?=$k?>>
+      <?endforeach?>
+    </error>
   <?endforeach?>
-</results>
+  </errors>
+<?else:?>
+  <count><?=count($model)?></count>
+  <results>
+    <?foreach($model as $row):?>
+      <result>
+        <?=partial("model", array("row"=>$row, "recurse"=>true), "xml")?>
+      </result>
+    <?endforeach?>
+  </results>
+<?endif?>
