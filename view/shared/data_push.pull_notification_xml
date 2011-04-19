@@ -1,0 +1,8 @@
+<count><?=count($recordset)?></count>
+<models>
+  <?foreach($recordset as $row):?>
+    <model>
+      <id><?=$row->primval()?></id>
+    </model>
+  <?endforeach?>
+</models>
