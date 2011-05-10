@@ -53,8 +53,7 @@ class BaseApiController extends WaxController{
             ) $model->filter($model->get_col($name)->col_name, $value);
           }
 
-          if($id) $model = $model->first();
-          elseif($params["page"]) $model = $model->page($params["page"]);
+          if($params["page"]) $model = $model->page($params["page"]);
           else $model = $model->all();
         }
 
