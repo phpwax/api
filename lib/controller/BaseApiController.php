@@ -57,7 +57,7 @@ class BaseApiController extends WaxController{
           elseif(!$id) $model = $model->all();
         }
         
-        elseif($id) $this->model = new WaxRecordset($model, array($model->row));
+        if($id) $this->model = new WaxRecordset($model, array($model->row));
         else $this->model = $model;
       }
     }
