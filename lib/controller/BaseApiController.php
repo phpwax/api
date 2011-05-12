@@ -100,7 +100,7 @@ class BaseApiController extends WaxController{
     $ret = new stdClass;
     if($model instanceof WaxModel){
       foreach($model->columns as $col_name => $col_data){
-        $data = $model->$col_name;
+        $data = $model->$col_name();
         if($data instanceof WaxModel || $data instanceof WaxRecordset) $ret->$col_name = $this->convert_to_std_class($data);
         else $ret->$col_name = $data;
       }

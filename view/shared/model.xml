@@ -1,5 +1,5 @@
 <?foreach($row->columns as $col_name => $col_data):?>
-  <?$col = $row->$col_name?>
+  <?$col = $row->$col_name()?>
   <?if($col_data[1]['editable'] === false || (!$recurse && ($col instanceof WaxRecordset || $col instanceof WaxModel))) continue;?>
   <<?=$col_name?>>
     <?if($col instanceof WaxModel):?>
