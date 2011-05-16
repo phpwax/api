@@ -1,0 +1,32 @@
+<h1>API Help</h1>
+<h2>Overview</h2>
+<p>This API makes use of <a href="http://en.wikipedia.org/wiki/Representational_State_Transfer">RESTful HTTP</a> style for communication.</p>
+<p>To create a new record, POST the records data as key/value pairs in standard HTTP POST format to the endpoint, not including a relevant primary key</p>
+<p>To update an existing record, POST the records data as key/value pairs in standard HTTP POST format to the endpoint, including the relevant primary key</p>
+<p>To delete an existing record, send an HTTP DELETE to the endpoint, including the relevant primary key</p>
+<p>To fetch one or many records, use a HTTP GET request to the endpoint. Include the relevant primary key to fetch only 1 record, or filter to fetch many records matching the relevant filter</p>
+<h2>Filters</h2>
+<p>Each endpoint includes a number of filters, allowing you to filter the data you receive. Standard filters will return only rows that have the relevant column exactly equal to the supplied filter value. Custom filters can be more complex e.g. returning all results above or below a certain value or nearby a certain place etc. Each custom filter will have documentation explaining the use in the relevant endpoint section.</p>
+<p>Please use filters where possible, to reduce the volume of data transferred. Some endpoints will have certain required filters that must be set for each request, in these cases they will be mentioned in the endpoint section.</p>
+<h2>Primary Keys</h2>
+<p>Primary keys will generally be integers and have the field name "id", where different this will be mentioned in the endpoint section.</p>
+<h2>Endpoints</h2>
+<p>Below is a list of all the data endpoints in the api.</p>
+<?foreach($doc_classes as $class => $data):?>
+  <h3><?=capitalize($class)?></h3>
+  <p>Endpoint url: <a href="http://<?=$_SERVER['HTTP_HOST']?>/<?=$controller?>/<?=$class?>.<?=$default_format?>">http://<?=$_SERVER['HTTP_HOST']?>/<?=$controller?>/<?=$class?>.<?=$default_format?></a></p>
+  <p>Primary key: <?=$data['primary_key']?>
+  <h4>Standard Filters</h4>
+  <ul>
+    <?foreach($data['std_filters'] as $filter):?>
+      <li><?=$filter?></li>
+    <?endforeach?>
+  </ul>
+  <?if($data['filters']):?>
+  <h4>Custom Filters</h4>
+  <?foreach($data['filters'] as $filter => $docs):?>
+    <h5><?=$filter?></h5>
+    <pre><?=$docs?></pre>
+  <?endforeach?>
+  <?endif?>
+<?endforeach?>

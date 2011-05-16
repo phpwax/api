@@ -2,6 +2,7 @@
 class BaseApiController extends WaxController{
   public $allowed_models = array();
   public $allowed_formats = array("json");
+  public $default_format = "json";
   public $disallowed_filters = array("page"); //disallow page as a filter, since it's a security risk pulling in a page param from the user
   
   public function method_missing(){
@@ -68,6 +69,62 @@ class BaseApiController extends WaxController{
         $this->output_obj = new stdClass;
         $this->output_obj->errors = $this->errors;
       }else $this->output_obj = $this->convert_to_std_class($model);
+    }
+  }
+  
+  public function help(){
+    $comment_tokens = array("T_COMMENT", "T_DOC_COMMENT");
+    $comment_blocks = array(
+      "#/\*+\s#ms",             // Multi Start
+      "#\*+/#ms",               // Multi Block End
+      "#/\*+([^\n]*)\*+/#ms",   // Multi Block on one line
+      "#\s*\*([^\n]*\n)#ms",      // Multi Block
+      "#//([^\n]*)#ms"          // Single Comment Line
+    );
+    $token_search_window = 10;
+    
+    $this->use_layout = "help";
+    foreach($this->allowed_models as $model){
+      $this->doc_classes[$model]['filters'] = array();
+      
+      $class = Inflections::camelize($model, true);
+      
+      //first, look for functions with docs to use
+      foreach(Autoloader::$registry_chain as $responsibility)
+        if(Autoloader::$registry[$responsibility][$class])
+          $fname = Autoloader::$registry[$responsibility][$class];
+      
+      if(!$fname) continue;
+      
+      $file = file_get_contents($fname);
+      $code = "";
+      $tokens = token_get_all($file);
+      foreach($tokens as $i => $tok) {
+        if(is_array($tok) && token_name($tok[0]) == "T_FUNCTION") {
+          //search 10 tokens back to try find comments relevant to the function
+          for($j = $i; $j > $i - 10; $j--){
+            //stop looking on single char tokens, these are like ;}) etc. this will prevent pulling in comments from other code blocks
+            if(!is_array($tok_j = $tokens[$j])) break;
+            if(is_array($tok_j = $tokens[$j]) && in_array(token_name($tok_j[0]), $comment_tokens)){
+              $help = preg_replace($comment_blocks, "$1", $tok_j[1]);
+              $this->doc_classes[$model]['filters'][$tokens[$i+2][1]] = $help;
+              break;
+            }
+          }
+          if(!$this->doc_classes[$model]['filters'][$tokens[$i+2][1]]) $this->doc_classes[$model]['std_filters'][] = $tokens[$i+2][1];
+        }
+      }
+      
+      //now, add columns to the docs
+      $instance = new $class;
+      $skip_cols = array_merge($this->doc_classes[$model]['filters'], array($instance->primary_key=>0)); //skip primary key, and matching functions
+      foreach(array_diff_key($instance->columns, $skip_cols) as $col => $col_data) if(!$col_data['skip_api_filter_help']){
+        if($custom_col_help = $col_data['api_filter_help']) $this->doc_classes[$model]['filters'][$col] = $custom_col_help;
+        else $this->doc_classes[$model]['std_filters'][] = $col;
+      }
+      
+      //primary key
+      $this->doc_classes[$model]['primary_key'] = $instance->primary_key;
     }
   }
   
