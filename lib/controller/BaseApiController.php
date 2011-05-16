@@ -116,15 +116,12 @@ class BaseApiController extends WaxController{
       }
       
       //now, add columns to the docs
-      $instance = new $class;
+      $instance = $this->doc_classes[$model]['model'] = new $class;
       $skip_cols = array_merge($this->doc_classes[$model]['filters'], array($instance->primary_key=>0)); //skip primary key, and matching functions
       foreach(array_diff_key($instance->columns, $skip_cols) as $col => $col_data) if(!$col_data['skip_api_filter_help']){
         if($custom_col_help = $col_data['api_filter_help']) $this->doc_classes[$model]['filters'][$col] = $custom_col_help;
         else $this->doc_classes[$model]['std_filters'][] = $col;
       }
-      
-      //primary key
-      $this->doc_classes[$model]['primary_key'] = $instance->primary_key;
     }
   }
   
