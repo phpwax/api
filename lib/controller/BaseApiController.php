@@ -3,7 +3,6 @@ class BaseApiController extends WaxController{
   public $allowed_models = array();
   public $allowed_formats = array("json");
   public $default_format = "json";
-  public $disallowed_filters = array("page"); //disallow page as a filter, since it's a security risk pulling in a page param from the user
   
   public function method_missing(){
     
@@ -31,9 +30,9 @@ class BaseApiController extends WaxController{
       
       //separate post or get vars that exist on the model from ones that don't
       $params = array_merge(array_diff_key($_GET, array("route"=>0)), $_POST);
-      $allowed_params = array_diff_key($params, $this->disallowed_filters);
-      $col_params = array_intersect_key($allowed_params, $model->columns);
+      $col_params = array_intersect_key($params, $model->columns);
       unset($col_params[$model->primary_key]);
+      $allowed_params = array_merge($col_params, array_intersect_key($params, array_flip((array)$model->allowed_api_filters)));
       
       //run access method on model if it exists
       if(WaxApplication::is_public_method($model, "access") && !($user = $this->run_method_if_exists($model, "access", array($params)))){
@@ -97,11 +96,13 @@ class BaseApiController extends WaxController{
       
       if(!$fname) continue;
       
+      $instance = $this->doc_classes[$model]['model'] = new $class;
+      
       $file = file_get_contents($fname);
       $code = "";
       $tokens = token_get_all($file);
       foreach($tokens as $i => $tok) {
-        if(is_array($tok) && token_name($tok[0]) == "T_FUNCTION") {
+        if(is_array($tok) && token_name($tok[0]) == "T_FUNCTION" && is_array($tokens[$i+2]) && in_array($tokens[$i+2][1], (array)$instance->allowed_api_filters)) {
           //search 10 tokens back to try find comments relevant to the function
           for($j = $i; $j > $i - 10; $j--){
             //stop looking on single char tokens, these are like ;}) etc. this will prevent pulling in comments from other code blocks
@@ -117,7 +118,6 @@ class BaseApiController extends WaxController{
       }
       
       //now, add columns to the docs
-      $instance = $this->doc_classes[$model]['model'] = new $class;
       $skip_cols = array_merge($this->doc_classes[$model]['filters'], array($instance->primary_key=>0)); //skip primary key, and matching functions
       foreach(array_diff_key($instance->columns, $skip_cols) as $col => $col_data) if(!$col_data['skip_api_filter_help']){
         if($custom_col_help = $col_data['api_filter_help']) $this->doc_classes[$model]['filters'][$col] = $custom_col_help;
