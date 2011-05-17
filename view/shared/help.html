@@ -5,6 +5,7 @@
 <p>To update an existing record, POST the records data as key/value pairs in standard HTTP POST format to the endpoint, including the relevant primary key</p>
 <p>To delete an existing record, send an HTTP DELETE to the endpoint, including the relevant primary key</p>
 <p>To fetch one or many records, use a HTTP GET request to the endpoint. Include the relevant primary key to fetch only 1 record, or filter to fetch many records matching the relevant filter</p>
+<?=partial("help_auth")?>
 <h2>Filters</h2>
 <p>Each endpoint includes a number of filters, allowing you to filter the data you receive. Standard filters will return only rows that have the relevant column exactly equal to the supplied filter value. Custom filters can be more complex e.g. returning all results above or below a certain value or nearby a certain place etc. Each custom filter will have documentation explaining the use in the relevant endpoint section.</p>
 <p>Please use filters where possible, to reduce the volume of data transferred. Some endpoints will have certain required filters that must be set for each request, in these cases they will be mentioned in the endpoint section.</p>
