@@ -3,9 +3,7 @@
     <errors>
     <?foreach($errors as $error):?>
       <error>
-        <?foreach($error as $k => $v):?>
-          <<?=$k?>><?=$v?></<?=$k?>>
-        <?endforeach?>
+        <?=partial("array", array("root"=>$error), "xml")?>
       </error>
     <?endforeach?>
     </errors>
