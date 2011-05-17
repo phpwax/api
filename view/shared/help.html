@@ -2,9 +2,45 @@
 <h2>Overview</h2>
 <p>This API makes use of <a href="http://en.wikipedia.org/wiki/Representational_State_Transfer">RESTful HTTP</a> style for communication.</p>
 <p>To create a new record, POST the records data as key/value pairs in standard HTTP POST format to the endpoint, not including a relevant primary key</p>
+<h5>Creating a new record example</h5>
+<h6>Request</h6>
+<p>
+  URL: http://<?=$_SERVER['HTTP_HOST']?>/<?=$controller?>/user.<?=$default_format?><br>
+  HTTP METHOD: POST/PUT<br>
+  Post Data: username=user1&amp;email=test%40test.com&amp;name=Test+Testerson
+</p>
+<h6>Response</h6>
+<pre><?=htmlentities(partial("user_example_response", array(), "xml"))?></pre>
 <p>To update an existing record, POST the records data as key/value pairs in standard HTTP POST format to the endpoint, including the relevant primary key</p>
+<h5>Updating an existing record example</h5>
+<p><strong>Note the difference between this and the above example, this one has an id added on the end of the url to indicate updating an existing record</strong></p>
+<h6>Request</h6>
+<p>
+  URL: http://<?=$_SERVER['HTTP_HOST']?>/<?=$controller?>/user/1.<?=$default_format?><br>
+  HTTP METHOD: POST/PUT<br>
+  Post Data: username=user2
+</p>
+<h6>Response</h6>
+<pre><?=htmlentities(partial("user_example_response", array("username"=>"user2"), "xml"))?></pre>
 <p>To delete an existing record, send an HTTP DELETE to the endpoint, including the relevant primary key</p>
+<h5>Deleting a record example</h5>
+<p><strong>Note the delete method returns the deleted object.</strong></p>
+<h6>Request</h6>
+<p>
+  URL: http://<?=$_SERVER['HTTP_HOST']?>/<?=$controller?>/user/1.<?=$default_format?><br>
+  HTTP METHOD: DELETE
+</p>
+<h6>Response</h6>
+<pre><?=htmlentities(partial("user_example_response", array("username"=>"user2"), "xml"))?></pre>
 <p>To fetch one or many records, use a HTTP GET request to the endpoint. Include the relevant primary key to fetch only 1 record, or filter to fetch many records matching the relevant filter</p>
+<h5>Fetching a record example</h5>
+<h6>Request</h6>
+<p>
+  URL: http://<?=$_SERVER['HTTP_HOST']?>/<?=$controller?>/user/1.<?=$default_format?><br>
+  HTTP METHOD: GET
+</p>
+<h6>Response</h6>
+<pre><?=htmlentities(partial("user_example_response", array("username"=>"user2"), "xml"))?></pre>
 <?=partial("help_auth")?>
 <h2>Filters</h2>
 <p>Each endpoint includes a number of filters, allowing you to filter the data you receive. Standard filters will return only rows that have the relevant column exactly equal to the supplied filter value. Custom filters can be more complex e.g. returning all results above or below a certain value or nearby a certain place etc. Each custom filter will have documentation explaining the use in the relevant endpoint section.</p>
