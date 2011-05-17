@@ -58,7 +58,8 @@ class BaseApiController extends WaxController{
           elseif(!$id) $model = $model->all();
         }
         
-        if($id) $this->model = new WaxRecordset($model, array($model->row));
+        //expose model to views, to keep consistency for rendering even single models are converted to a 1-row recordset
+        if($model instanceof WaxModel) $this->model = new WaxRecordset($model, array($model->row));
         else $this->model = $model;
       }
     }
