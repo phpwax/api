@@ -1,9 +1,3 @@
 <?foreach($root as $k => $v):?>
-  <<?=$k?>>
-    <?if(is_array($v)):?>
-      <?=partial("array", array("root"=>$v), "xml")?>
-    <?else:?>
-      <?=$v?>
-    <?endif?>
-  </<?=$k?>>
+  <<?=$k?>><?if(is_array($v)):?><?=partial("array", array("root"=>$v), "xml")?><?else:?><?=$v?><?endif?></<?=$k?>>
 <?endforeach?>
