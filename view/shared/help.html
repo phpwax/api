@@ -54,6 +54,12 @@
   <?=$data['model']->api_help?$data['model']->api_help:""?>
   <p>Endpoint url: <a href="http://<?=$_SERVER['HTTP_HOST']?>/<?=$controller?>/<?=$class?>.<?=$default_format?>">http://<?=$_SERVER['HTTP_HOST']?>/<?=$controller?>/<?=$class?>.<?=$default_format?></a></p>
   <p>Primary key: <?=$data['model']->primary_key?>
+  <h4>Columns</h4>
+  <ul>
+  <?foreach($data['model']->columns as $col_name => $col_data):?>
+    <li><?=$col_name?> (<?=$col_data[0]?>)</li>
+  <?endforeach?>
+  </ul>
   <h4>Standard Filters</h4>
   <ul>
     <?foreach($data['std_filters'] as $filter):?>
