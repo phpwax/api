@@ -12,7 +12,7 @@
     <results>
       <?foreach($model as $row):?>
         <result>
-          <?=partial("model", array("row"=>$row, "recurse"=>true), "xml")?>
+          <?=partial("model", array("row"=>$row, "recurse"=>false), "xml")?>
         </result>
       <?endforeach?>
     </results>
