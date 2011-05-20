@@ -1,3 +1,3 @@
 <?foreach($root as $k => $v):?>
-  <<?=$k?>><?if(is_array($v)):?><?=partial("array", array("root"=>$v), "xml")?><?else:?><?=$v?><?endif?></<?=$k?>>
+  <<?=$xml_k = (is_numeric($k)?$root_name:$k)?>><?if(is_array($v)):?><?=partial("array", array("root"=>$v, "root_name"=>$k), "xml")?><?else:?><?=$v?><?endif?></<?=$xml_k?>>
 <?endforeach?>

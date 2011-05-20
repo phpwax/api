@@ -3,7 +3,7 @@
     <errors>
     <?foreach($errors as $error):?>
       <error>
-        <?=partial("array", array("root"=>$error), "xml")?>
+        <?=partial("array", array("root"=>$error, "root_name"=>"error"), "xml")?>
       </error>
     <?endforeach?>
     </errors>
