@@ -61,6 +61,14 @@
     <li><?=$col_name?> (<?=$col_data[0]?>)</li>
   <?endforeach?>
   </ul>
+  <?if($data['std_filters']):?>
+  <h4>Standard Filters</h4>
+  <ul>
+    <?foreach($data['std_filters'] as $filter):?>
+      <li><?=$filter?></li>
+    <?endforeach?>
+  </ul>
+  <?endif?>
   <?if($data['filters']):?>
   <h4>Custom Filters</h4>
   <?foreach($data['filters'] as $filter => $docs):?>
