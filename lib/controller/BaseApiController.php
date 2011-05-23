@@ -30,6 +30,13 @@ class BaseApiController extends WaxController{
       
       //separate post or get vars that exist on the model from ones that don't
       $params = array_merge(array_diff_key($_GET, array("route"=>0)), $_POST);
+      
+      //allow a model to map each column/filter to another via a mapping array
+      foreach((array)$model->api_col_mapping as $k => $v){
+        $params[$v] = $params[$k];
+        unset($params[$k]);
+      }
+      
       $col_params = array_intersect_key($params, $model->columns);
       unset($col_params[$model->primary_key]);
       $allowed_params = array_merge($col_params, array_intersect_key($params, array_flip((array)$model->allowed_api_filters)));
