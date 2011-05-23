@@ -4,8 +4,8 @@ class BaseApiController extends WaxController{
   public $allowed_formats = array("json");
   public $default_format = "json";
   
-  public function method_missing(){
-    
+  function __construct($application=false){
+    parent::__construct($application);
     //hook to allow generic views if named ones don't exist, i.e. method_missing.html
     $controller_class = get_class($this);
     $controller_parent_class = get_parent_class($this);
@@ -18,6 +18,9 @@ class BaseApiController extends WaxController{
         $view->add_path($path."shared/method_missing");
       }
     });
+  }
+  
+  public function method_missing(){
     
     //access control for models, throwing a standard 404
     if(!in_array($this->action, $this->allowed_models)) throw new WXRoutingException("No Public Action Defined for - ".$this->action." in controller ".get_class($this).".", "Missing Action");
@@ -127,6 +130,10 @@ class BaseApiController extends WaxController{
       //now, add columns to the docs
       $skip_cols = array_merge($this->doc_classes[$model]['filters'], array($instance->primary_key=>0)); //skip primary key, and matching functions
       foreach(array_diff_key($instance->columns, $skip_cols) as $col => $col_data) if(!$col_data['skip_api_filter_help']){
+        if($col_data[0] == "CharField") $instance->$col = "Character Field Test Data";
+        elseif($col_data[0] == "IntegerField" || $col_data[0] == "FloatField") $instance->$col = 0;
+        elseif($col_data[0] == "DateTimeField") $instance->$col = time();
+        
         if($custom_col_help = $col_data['api_filter_help']) $this->doc_classes[$model]['filters'][$col] = $custom_col_help;
       }
     }

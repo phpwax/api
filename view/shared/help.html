@@ -68,4 +68,11 @@
     <pre><?=$docs?></pre>
   <?endforeach?>
   <?endif?>
+  <h4>Example</h4>
+  <?
+    $layout = new WaxTemplate(array("content_for_layout"=>partial($class, array("model"=>new WaxRecordset($data['model'], array($data['model']->row))), $default_format)));
+    $layout->add_path(VIEW_DIR."layouts/application");
+    foreach((array)Autoloader::view_paths("plugin") as $path) $layout->add_path($path."layouts/application");
+  ?>
+  <pre><?=htmlentities($layout->parse($default_format))?></pre>
 <?endforeach?>
