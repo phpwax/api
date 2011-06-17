@@ -41,7 +41,6 @@
 </p>
 <h6>Response</h6>
 <pre><?=htmlentities(partial("user_example_response", array("username"=>"user2"), "xml"))?></pre>
-<?=partial("help_auth")?>
 <h2>Filters</h2>
 <p>Each endpoint includes a number of filters, allowing you to filter the data you receive. Most of the time columns can be filtered on directly using a filter matching the name of the column, the provided value will be tested for an exact match to the specified column. Standard Filters will behave just like columns, testing for an exact match to the specified value.</p>
 <p>Custom filters can also be included e.g. returning all results above or below a certain value or nearby a certain place etc. Each custom filter will have documentation explaining the use in the relevant endpoint section below.</p>
@@ -97,3 +96,4 @@
   ?>
   <pre><?=htmlentities($example_view)?></pre>
 <?endforeach?>
+<?=partial("application_help")?>
