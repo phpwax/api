@@ -112,9 +112,7 @@ class BaseApiController extends WaxController{
       
       if(!$fname) continue;
       
-      if($this->use_actual_data){
-        $instance = $this->doc_classes[$model]['model'] = $class::find("first", array("order"=>"RAND()"));
-      }else{
+      if(!$this->use_actual_data || !($instance = $this->doc_classes[$model]['model'] = $class::find("first", array("order"=>"RAND()")))){
         $instance = $this->doc_classes[$model]['model'] = new $class;
         $instance->{$instance->primary_key} = -1;
       }
@@ -144,7 +142,7 @@ class BaseApiController extends WaxController{
       foreach(array_diff_key($instance->columns, $skip_cols) as $col => $col_data) if(!$col_data['skip_api_filter_help']){
         
         //add in dummy data if we're not using actual database data
-        if(!$this->use_actual_data){
+        if($instance->primval == -1){
           if($col_data[0] == "CharField") $instance->$col = "Character Field Test Data";
           elseif($col_data[0] == "IntegerField" || $col_data[0] == "FloatField") $instance->$col = 0;
           elseif($col_data[0] == "DateTimeField") $instance->$col = time();
