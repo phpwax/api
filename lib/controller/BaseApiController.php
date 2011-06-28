@@ -139,7 +139,7 @@ class BaseApiController extends WaxController{
       
       //now, add columns to the docs
       $skip_cols = array_merge($this->doc_classes[$model]['filters'], array($instance->primary_key=>0)); //skip primary key, and matching functions
-      foreach(array_diff_key($instance->columns, $skip_cols) as $col => $col_data) if(!$col_data['skip_api_filter_help']){
+      foreach(array_diff_key($instance->columns, $skip_cols) as $col => $col_data) if(!$col_data[1]['skip_api_filter_help']){
         
         //add in dummy data if we're not using actual database data
         if($instance->primval == -1){
