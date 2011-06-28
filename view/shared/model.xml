@@ -1,5 +1,5 @@
 <?foreach($row->columns as $col_name => $col_data):?>
   <?$col = $row->$col_name()?>
   <?if($col_data[1]['editable'] === false || (!$recurse && ($col instanceof WaxRecordset || $col instanceof WaxModel))) continue;?>
-  <<?=$col_name?>><?if($col instanceof WaxModel):?><?=partial("model", array("row"=>$row), "xml")?><?elseif($col instanceof WaxRecordSet):?><?$class_name = underscore(get_class($row->model))?><?foreach($col as $r):?><<?=$class_name?>><?=partial("model", array("row"=>$r), "xml")?></<?=$class_name?>><?endforeach?><?else:?><?=$col?><?endif?></<?=$col_name?>>
+  <<?=$col_name?>><?if($col instanceof WaxModel):?><?=partial("model", array("row"=>$col), "xml")?><?elseif($col instanceof WaxRecordSet):?><?$class_name = underscore(get_class($col->target_model))?><?foreach($col as $r):?><<?=$class_name?>><?=partial("model", array("row"=>$r), "xml")?></<?=$class_name?>><?endforeach?><?else:?><?=$col?><?endif?></<?=$col_name?>>
 <?endforeach?>
