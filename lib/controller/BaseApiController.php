@@ -83,6 +83,12 @@ class BaseApiController extends WaxController{
   }
   
   public function help(){
+    //set_environment returns false on failure, null on success. testing for false.
+    if(Config::set_environment(ENV.'help') !== false){
+      WaxModel::load_adapter(Config::get('db'));
+      $this->use_actual_data = 1;
+    }
+    
     $comment_tokens = array("T_COMMENT", "T_DOC_COMMENT");
     $comment_blocks = array(
       "#/\*+\s#ms",             // Multi Start
@@ -106,8 +112,14 @@ class BaseApiController extends WaxController{
       
       if(!$fname) continue;
       
-      $instance = $this->doc_classes[$model]['model'] = new $class;
+      if($this->use_actual_data){
+        $instance = $this->doc_classes[$model]['model'] = $class::find("first", array("order"=>"RAND()"));
+      }else{
+        $instance = $this->doc_classes[$model]['model'] = new $class;
+        $instance->{$instance->primary_key} = -1;
+      }
       
+      //build documentation using php tokens
       $file = file_get_contents($fname);
       $code = "";
       $tokens = token_get_all($file);
@@ -130,9 +142,13 @@ class BaseApiController extends WaxController{
       //now, add columns to the docs
       $skip_cols = array_merge($this->doc_classes[$model]['filters'], array($instance->primary_key=>0)); //skip primary key, and matching functions
       foreach(array_diff_key($instance->columns, $skip_cols) as $col => $col_data) if(!$col_data['skip_api_filter_help']){
-        if($col_data[0] == "CharField") $instance->$col = "Character Field Test Data";
-        elseif($col_data[0] == "IntegerField" || $col_data[0] == "FloatField") $instance->$col = 0;
-        elseif($col_data[0] == "DateTimeField") $instance->$col = time();
+        
+        //add in dummy data if we're not using actual database data
+        if(!$this->use_actual_data){
+          if($col_data[0] == "CharField") $instance->$col = "Character Field Test Data";
+          elseif($col_data[0] == "IntegerField" || $col_data[0] == "FloatField") $instance->$col = 0;
+          elseif($col_data[0] == "DateTimeField") $instance->$col = time();
+        }
         
         if($custom_col_help = $col_data['api_filter_help']) $this->doc_classes[$model]['filters'][$col] = $custom_col_help;
       }
