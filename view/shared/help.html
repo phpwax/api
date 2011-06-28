@@ -75,25 +75,27 @@
     <pre><?=$docs?></pre>
   <?endforeach?>
   <?endif?>
-  <h4>Example</h4>
-  <?
-    $layout = new WaxTemplate(array("content_for_layout"=>partial($class, array("model"=>new WaxRecordset($data['model'], array($data['model']->row))), $default_format)));
-    $layout->add_path(VIEW_DIR."layouts/application");
-    foreach((array)Autoloader::view_paths("plugin") as $path) $layout->add_path($path."layouts/application");
-    $example_view = $layout->parse($default_format);
-    if(class_exists("tidy", false)){
-      $tidy_options = array(
-        'input-xml'    => true,
-        'output-xml'   => true,
-        'indent'       => true,
-        'wrap'         => false
-      );
-      $tidy = new tidy;
-      $tidy->parseString($example_view, $tidy_options, "utf8");
-      $tidy->cleanRepair();
-      $example_view = (string)$tidy;
-    }
-  ?>
-  <pre><?=htmlentities($example_view)?></pre>
+  <?if($data['model']):?>
+    <h4>Example</h4>
+    <?
+      $layout = new WaxTemplate(array("content_for_layout"=>partial($class, array("model"=>new WaxRecordset($data['model'], array($data['model']->row))), $default_format)));
+      $layout->add_path(VIEW_DIR."layouts/application");
+      foreach((array)Autoloader::view_paths("plugin") as $path) $layout->add_path($path."layouts/application");
+      $example_view = $layout->parse($default_format);
+      if(class_exists("tidy", false)){
+        $tidy_options = array(
+          'input-xml'    => true,
+          'output-xml'   => true,
+          'indent'       => true,
+          'wrap'         => false
+        );
+        $tidy = new tidy;
+        $tidy->parseString($example_view, $tidy_options, "utf8");
+        $tidy->cleanRepair();
+        $example_view = (string)$tidy;
+      }
+    ?>
+    <pre><?=htmlentities($example_view)?></pre>
+  <?endif?>
 <?endforeach?>
 <?=partial("application_help")?>
