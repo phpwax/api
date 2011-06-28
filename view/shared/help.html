@@ -57,7 +57,9 @@
   <h4>Columns</h4>
   <ul>
   <?foreach($data['model']->columns as $col_name => $col_data):?>
-    <li><?=$col_name?> (<?=$col_data[0]?>)</li>
+    <?if(!$col_data[1]['skip_api_filter_help']):?>
+      <li><?=$col_name?> (<?=$col_data[0]?>)</li>
+    <?endif?>
   <?endforeach?>
   </ul>
   <?if($data['std_filters']):?>
