@@ -178,20 +178,26 @@ class BaseApiController extends WaxController{
    * @param WaxModel/WaxRecordset $model
    * @return stdClass
    */
-  private function convert_to_std_class($model){
-    $ret = new stdClass;
-    if($model instanceof WaxModel){
-      foreach($model->columns as $col_name => $col_data){
-        $data = $model->$col_name();
-        if($data instanceof WaxModel || $data instanceof WaxRecordset) $ret->$col_name = $this->convert_to_std_class($data);
-        else $ret->$col_name = $data;
+  private function convert_to_std_class($model, $recursion_check = array()){
+    $class = get_class($model);
+    $primval = $model->primval();
+    if(!$recursion_check[$class][$primval]){
+      $recursion_check[$class][$primval] = true;
+      $ret = new stdClass;
+      if($model instanceof WaxModel){
+        foreach($model->columns as $col_name => $col_data){
+          $data = $model->$col_name();
+          if($data instanceof WaxModel || $data instanceof WaxRecordset) $ret->$col_name = $this->convert_to_std_class($data, $recursion_check);
+          else $ret->$col_name = $data;
+        }
+      }elseif($model instanceof WaxRecordset){
+        $ret->count = $model->count();
+        $ret->results = array();
+        foreach($model as $row) $ret->results[] = $this->convert_to_std_class($row, $recursion_check);
       }
-    }elseif($model instanceof WaxRecordset){
-      $ret->count = $model->count();
-      $ret->results = array();
-      foreach($model as $row) $ret->results[] = $this->convert_to_std_class($row);
-    }
-    return $ret;
+      unset($recursion_check[$class][$primval]);
+      return $ret;
+      }
   }
 }
 ?>
