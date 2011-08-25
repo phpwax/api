@@ -21,6 +21,7 @@ class BaseApiController extends WaxController{
   }
   
   public function method_missing(){
+    set_time_limit(0);
     
     //access control for models, throwing a standard 404
     if(!in_array($this->action, $this->allowed_models)) throw new WXRoutingException("No Public Action Defined for - ".$this->action." in controller ".get_class($this).".", "Missing Action");
