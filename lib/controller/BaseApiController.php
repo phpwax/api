@@ -156,7 +156,7 @@ class BaseApiController extends WaxController{
    * only checks the application registry for speed
    */
   private function class_exists_without_fatal_errors($class_name){
-    return array_key_exists($class_name, Autoloader::$registry["application"]);
+    return array_key_exists($class_name, Autoloader::$registry["application"]) || array_key_exists($class_name, Autoloader::$registry["plugin"]);
   }
   
   /**
