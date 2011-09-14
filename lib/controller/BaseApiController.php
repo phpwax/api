@@ -3,6 +3,7 @@ class BaseApiController extends WaxController{
   public $allowed_models = array();
   public $allowed_formats = array("json", "xml");
   public $default_format = "json";
+  public $default_per_page = 10;
   
   function __construct($application=false){
     parent::__construct($application);
@@ -21,6 +22,8 @@ class BaseApiController extends WaxController{
   }
   
   public function method_missing(){
+    set_time_limit(0); //no time limit, in case the request is massive
+    
     //access control for models, throwing a standard 404
     if(!in_array($this->action, $this->allowed_models)) throw new WXRoutingException("No Public Action Defined for - ".$this->action." in controller ".get_class($this).".", "Missing Action");
     //the line below has a static var check that is equivalent to class_exists, but won't trigger a fatal error from trying to autoload
@@ -47,23 +50,25 @@ class BaseApiController extends WaxController{
       if(WaxApplication::is_public_method($model, "access") && !($user = $this->run_method_if_exists($model, "access", array($params)))){
         $this->errors[] = array("message" => "Access denied, please refer to our documentation for more details.");
       }else{
-        //handle different HTTP methods, POST/PUT = create/update, DELETE = delete, GET = read
+        //handle different HTTP methods, POST/PUT = create/update, DELETE = delete, GET = read (default)
         if($_SERVER['REQUEST_METHOD'] == "POST" || $_SERVER['REQUEST_METHOD'] == "PUT"){
           $model->set_attributes($col_params);
           if(!$model->save()) $this->errors[] = array("message" => "Could not save", "data" => $model->errors);
         }elseif($_SERVER['REQUEST_METHOD'] == "DELETE"){
           if(!$id) $this->errors[] = array("message" => "Can't delete without specifying an id");
           elseif(!$model->primval() || !$model->delete()) $this->errors[] = array("message" => "Could not delete", "data" => $model->errors);
-        }else{
+        }elseif(!$model->primval()){ //GET or anything else
+          
+          //first apply relevant filters
           foreach((array)$allowed_params as $name => $value){
             if(
               !$this->run_method_if_exists($model, $name, array($value)) && //run param as a method on the model if that method is defined
               in_array($name, array_keys($model->columns)) //if model method didn't exist for a param and it's a defined column, filter on it instead
             ) $model->filter($model->get_col($name)->col_name, $value);
           }
-
-          if($params["page"]) $model = $model->page($params["page"]);
-          elseif(!$id) $model = $model->all();
+          
+          if($params["per_page"] === "0") $model = $model->all();
+          else $model = $model->page($params["page"]?$params["page"]:1, $params["per_page"]?$params["per_page"]:$this->default_per_page);
         }
         
         //expose model to views, to keep consistency for rendering even single models are converted to a 1-row recordset
