@@ -12,8 +12,10 @@
     <per_page><?=$model->per_page?></per_page>
     <current_page><?=$model->current_page?></current_page>
     <total_pages><?=$model->total_pages?></total_pages>
-    <?endif?>
+    <count><?=$model->count?></count>
+    <?else:?>
     <count><?=$model->count()?></count>
+    <?endif?>
     <results>
       <?foreach($model as $row):?>
         <result>
