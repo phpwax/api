@@ -1,7 +1,7 @@
 <?php
 class BaseApiController extends WaxController{
   public $allowed_models = array();
-  public $allowed_formats = array("json");
+  public $allowed_formats = array("json", "xml");
   public $default_format = "json";
   
   function __construct($application=false){
