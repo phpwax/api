@@ -4,21 +4,27 @@ class BaseApiController extends WaxController{
   public $allowed_formats = array("json", "xml");
   public $default_format = "json";
   public $default_per_page = 10;
+  public static $added_view_path_hook;
   
   function __construct($application=false){
     parent::__construct($application);
+    
     //hook to allow generic views if named ones don't exist, i.e. method_missing.html
-    $controller_class = get_class($this);
-    $controller_parent_class = get_parent_class($this);
-    //adding default view paths, to allow overriding, but also have a fallback view
-    WaxEvent::add("wax.after_plugin_view_paths", function() use($controller_class, $controller_parent_class){
+    if(!self::$added_view_path_hook){
+      $extra_view_paths = array();
       foreach((array)Autoloader::view_paths("plugin") as $path) {
-        $view = WaxEvent::data();
-        $view->add_path($path.$controller_class."/method_missing");
-        $view->add_path($path.$controller_parent_class."/method_missing");
-        $view->add_path($path."shared/method_missing");
+        $extra_view_paths[] = $path.get_class($this)."/method_missing";
+        $extra_view_paths[] = $path.get_parent_class($this)."/method_missing";
+        $extra_view_paths[] = $path."shared/method_missing";
       }
-    });
+      
+      //adding default view paths, to allow overriding, but also have a fallback view
+      WaxEvent::add("wax.after_plugin_view_paths", function() use($extra_view_paths){
+        WaxEvent::data()->template_paths = array_merge(WaxEvent::data()->template_paths, $extra_view_paths);
+      });
+      
+      self::$added_view_path_hook = 1;
+    }
   }
   
   public function method_missing(){
