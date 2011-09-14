@@ -1,7 +1,8 @@
 <?if(!$recursion_check[get_class($row)][$row->primval()]):?>
   <?$recursion_check[get_class($row)][$row->primval()] = true?>
   <?foreach($row->columns as $col_name => $col_data):?>
-    <?$col = $row->$col_name()?>
+    <?if($col_data[0] == "DateTimeField") $col = date("c", $row->row[$col_name]);
+      else $col = $row->$col_name();?>
     <?if($row->skip_recurse && ($col instanceof WaxRecordset || $col instanceof WaxModel)) continue;?>
     <<?=$col_name?>><?if($col instanceof WaxModel):?><?=partial("model", array("row"=>$col, "recursion_check"=>$recursion_check), "xml")?><?elseif($col instanceof WaxRecordSet):?><?$class_name = underscore(get_class($col->target_model))?><?foreach($col as $r):?><<?=$class_name?>><?=partial("model", array("row"=>$r, "recursion_check"=>$recursion_check), "xml")?></<?=$class_name?>><?endforeach?><?else:?><?=$col?><?endif?></<?=$col_name?>>
   <?endforeach?>
