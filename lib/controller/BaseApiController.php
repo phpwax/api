@@ -226,12 +226,17 @@ class BaseApiController extends WaxController{
     //if there are any column names matching at this level of the array, assume this level is a row. otherwise try multiple rows.
     if($matched_columns){
       foreach($matched_columns as $col){
-        $value = $array[$col];
-        if(is_array($value) && in_array($model->columns[$col][0], array("ForeignKey", "HasManyField", "ManyToManyField"))){
-          if(!($target_model = $model->columns[$col][1]["target_model"])) $target_model = $model->get_col($col)->target_model;
-          $model->$col = $this->array_to_wax_model($value, $target_model);
-        }else{
-          $model->$col = $value;
+        if($value = $array[$col]){
+          if(in_array($model->columns[$col][0], array("ForeignKey", "HasManyField", "ManyToManyField"))){
+            if(!($target_model = $model->columns[$col][1]["target_model"])) $target_model = $model->get_col($col)->target_model;
+            $underscored_class = underscore($class);
+            if($array[$underscored_class]) $array = $array[$underscored_class];
+            $model->$col = $this->array_to_wax_model($value, $target_model);
+          }else{
+            //hack for weird values that end up in arrays from json_encode then json_decode
+            if(is_array($value)) $model->$col = $value[0];
+            else $model->$col = (string)$value;
+          }
         }
       }
       $model->validation_groups = array("dont validate at all, that's not for the api");
