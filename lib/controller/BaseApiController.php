@@ -169,7 +169,7 @@ class BaseApiController extends WaxController{
   /**
    * only checks the application registry for speed
    */
-  private function class_exists_without_fatal_errors($class_name){
+  public function class_exists_without_fatal_errors($class_name){
     return array_key_exists($class_name, Autoloader::$registry["application"]) || array_key_exists($class_name, Autoloader::$registry["plugin"]);
   }
   
@@ -181,7 +181,7 @@ class BaseApiController extends WaxController{
    * @param array $arguments
    * @return result of called method if it existed, otherwise null
    */
-  private function run_method_if_exists($obj, $method, $arguments = array()){
+  public function run_method_if_exists($obj, $method, $arguments = array()){
     if(WaxApplication::is_public_method($obj, $method)) return call_user_func_array(array($obj, $method), $arguments);
   }
   
