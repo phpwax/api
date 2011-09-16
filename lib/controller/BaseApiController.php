@@ -257,7 +257,8 @@ class BaseApiController extends WaxController{
   public function handle_post_xml($class){
     $xml = simplexml_load_string(file_get_contents('php://input'));
     $array = $this->simple_xml_to_array($xml);
-    return $this->array_to_wax_model($array["results"]["result"], $class);
+    if($array["results"]) $array = $array["results"]["result"];
+    return $this->array_to_wax_model($array, $class);
   }
   
 }
