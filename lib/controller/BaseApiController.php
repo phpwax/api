@@ -92,6 +92,9 @@ class BaseApiController extends WaxController{
     }
   }
   
+  /**
+   * help action to generate dynamic help based on model code
+   */
   public function help(){
     //set_environment returns false on failure, null on success. testing for false.
     if(Config::set_environment(ENV.'help') !== false){
