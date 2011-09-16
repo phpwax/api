@@ -58,8 +58,11 @@ class BaseApiController extends WaxController{
       }else{
         //handle different HTTP methods, POST/PUT = create/update, DELETE = delete, GET = read (default)
         if($_SERVER['REQUEST_METHOD'] == "POST" || $_SERVER['REQUEST_METHOD'] == "PUT"){
-          $model->set_attributes($col_params);
-          if(!$model->save()) $this->errors[] = array("message" => "Could not save", "data" => $model->errors);
+          if($this->use_format && method_exists($this, "handle_post_".$this->use_format)) $model = call_user_func(array($this, "handle_post_" . $this->use_format), $model_class);
+          else{
+            $model->set_attributes($col_params);
+            if(!$model->save()) $this->errors[] = array("message" => "Could not save", "data" => $model->errors);
+          }
         }elseif($_SERVER['REQUEST_METHOD'] == "DELETE"){
           if(!$id) $this->errors[] = array("message" => "Can't delete without specifying an id");
           elseif(!$model->primval() || !$model->delete()) $this->errors[] = array("message" => "Could not delete", "data" => $model->errors);
@@ -212,5 +215,50 @@ class BaseApiController extends WaxController{
       return $ret;
       }
   }
+  
+  /**
+   * reverse of above, saves data in the array back to the database
+   */
+  public function array_to_wax_model($array, $class){
+    $model = new $class;
+    $matched_columns = array_intersect(array_keys($array), array_keys($model->columns)); //cut out cols in the data that don't match the cols on the model
+    
+    //if there are any column names matching at this level of the array, assume this level is a row. otherwise try multiple rows.
+    if($matched_columns){
+      foreach($matched_columns as $col){
+        $value = $array[$col];
+        if(is_array($value) && in_array($model->columns[$col][0], array("ForeignKey", "HasManyField", "ManyToManyField"))){
+          if(!($target_model = $model->columns[$col][1]["target_model"])) $target_model = $model->get_col($col)->target_model;
+          $model->$col = $this->array_to_wax_model($value, $target_model);
+        }else{
+          $model->$col = $value;
+        }
+      }
+      return $model;
+    }else{
+      $rowset = array();
+      foreach($array as $row){
+        $rowset[] = $this->array_to_wax_model($row, $class)->row;
+      }
+      return new WaxRecordset($model, $rowset);
+    }
+  }
+  
+  /**
+   * convert simplexml to multidimensional array
+   *
+   * @param string $xml 
+   * @return array
+   */
+  public function simple_xml_to_array($xml){
+    return json_decode(json_encode($xml),TRUE);
+  }
+  
+  public function handle_post_xml($class){
+    $xml = simplexml_load_string(file_get_contents('php://input'));
+    $array = $this->simple_xml_to_array($xml);
+    return $this->array_to_wax_model($array["results"]["result"], $class);
+  }
+  
 }
 ?>
