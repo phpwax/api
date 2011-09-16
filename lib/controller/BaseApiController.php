@@ -234,6 +234,8 @@ class BaseApiController extends WaxController{
           $model->$col = $value;
         }
       }
+      $model->validation_groups = array("dont validate at all, that's not for the api");
+      $model->save();
       return $model;
     }else{
       $rowset = array();
