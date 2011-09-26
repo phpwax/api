@@ -12,6 +12,18 @@ class BaseApiController extends WaxController{
     //hook to allow generic views if named ones don't exist, i.e. method_missing.html
     if(!self::$added_view_path_hook){
       $extra_view_paths = array();
+      foreach(Autoloader::view_paths("user") as $path) {
+        $extra_view_paths[] = $path.WaxUrl::get("controller")."/method_missing";
+        $extra_view_paths[] = $path."shared/method_missing";
+        $extra_view_paths[] = $path."method_missing";
+      }
+      
+      //adding default view paths, to allow overriding, but also have a fallback view
+      WaxEvent::add("wax.after_local_view_paths", function() use($extra_view_paths){
+        WaxEvent::data()->template_paths = array_merge(WaxEvent::data()->template_paths, $extra_view_paths);
+      });
+      
+      $extra_view_paths = array();
       foreach((array)Autoloader::view_paths("plugin") as $path) {
         $extra_view_paths[] = $path.get_class($this)."/method_missing";
         $extra_view_paths[] = $path.get_parent_class($this)."/method_missing";
