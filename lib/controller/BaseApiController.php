@@ -67,6 +67,9 @@ class BaseApiController extends WaxController{
       //run access method on model if it exists
       if(WaxApplication::is_public_method($model, "access") && !($user = $this->run_method_if_exists($model, "access", array($params)))){
         $this->errors[] = array("message" => "Access denied, please refer to our documentation for more details.");
+      //hook to override api handling completely per model
+      }elseif(WaxApplication::is_public_method($model, "api_override")){
+        $model->api_override($this);
       }else{
         //handle different HTTP methods, POST/PUT = create/update, DELETE = delete, GET = read (default)
         if($_SERVER['REQUEST_METHOD'] == "POST" || $_SERVER['REQUEST_METHOD'] == "PUT"){
