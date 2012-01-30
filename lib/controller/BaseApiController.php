@@ -65,6 +65,7 @@ class BaseApiController extends WaxController{
         $col_params = array_intersect_key($params, $model->columns);
         unset($col_params[$model->primary_key]);
         $allowed_params = array_merge($col_params, array_intersect_key($params, array_flip((array)$model->allowed_api_filters)));
+        WaxEvent::run("base.api.allowed_params", $allowed_params);
 
         //run access method on model if it exists
         if(WaxApplication::is_public_method($model, "access") && !($user = $this->run_method_if_exists($model, "access", array($params)))){
