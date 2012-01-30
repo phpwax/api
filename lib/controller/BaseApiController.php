@@ -37,6 +37,8 @@ class BaseApiController extends WaxController{
 
       self::$added_view_path_hook = 1;
     }
+    //run an event, this can be used for usage tracking etc
+    WaxEvent::run("base.api.__construct", $this);
   }
 
   public function method_missing($param){
