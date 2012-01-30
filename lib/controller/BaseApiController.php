@@ -90,7 +90,7 @@ class BaseApiController extends WaxController{
               if(
                 !$this->run_method_if_exists($model, $name, array($value)) && //run param as a method on the model if that method is defined
                 in_array($name, array_keys($model->columns)) //if model method didn't exist for a param and it's a defined column, filter on it instead
-              ) $model->filter($model->get_col($name)->col_name, $value);
+              ) $model = $this->filter_model($model, $name, $value);
             }
 
             if($params["per_page"] === "0") $model = $model->all();
@@ -113,6 +113,53 @@ class BaseApiController extends WaxController{
 
     }
 
+  }
+
+  /**
+   * based on the join type of the column being filtered, call other functions
+   * or return the standard filter
+   */
+  protected function filter_model($model, $col, $values){
+    $col_type = $model->columns[$col][0];
+    //if its a join that we need to find the other side of, go fetch it
+    if($col_type == "ManyToManyField") return $this->filter_many_to_many($model, $col, $values);
+    else if($col_type == "HasManyField") return $this->filter_has_many($model, $col, $values);
+    else return $model->filter($model->get_col($col)->col_name, $values);
+  }
+  /**
+   * many to many filtering
+   * - from the column data it finds the join table and
+   *   creates a fake model for that table, finds joins,
+   *   fetches results and adds the filtes on the main model
+   */
+  protected function filter_many_to_many($model, $col, $values){
+    if(!is_array($values)) $values = array($values);
+    $primaries = array(0);
+    //find target model
+    $target_class = $model->columns[$col][1]['target_model'];
+    $target = new $target_class;
+    //work out the column names on both sides
+    $target_col = $target->table."_".$target->primary_key;
+    $model_join_col = ($model->columns[$col][1]['join_field']) ? $model->columns[$col][1]['join_field'] : $model->table."_".$model->primary_key;
+    $fake_model = new WaxModel;
+    //work out the join table name
+    if($target->table < $model->table) $join_table = $target->table."_".$model->table;
+    else $join_table = $model->table ."_".$target->table;
+    //fetch the details
+    $fake_model->table = $join_table;
+    foreach($fake_model->filter($target_col, $values)->all() as $row) $primaries[] = $row->$model_join_col;
+
+    return $model->filter($model->primary_key, $primaries);
+  }
+
+  public function filter_has_many($model, $col, $values){
+    if(!is_array($values)) $values = array($values);
+    $target_class = $model->columns[$col][1]['target_model'];
+    $target = new $target_class;
+    $model_join_col = ($model->columns[$col][1]['join_field']) ? $model->columns[$col][1]['join_field'] : $model->table."_".$model->primary_key;
+    $ids = array(0);
+    foreach($target->filter($model_join_col, $values)->all() as $row) $ids[] = $row->primval;
+    return $model->filter($model->primary_key, $ids);
   }
 
   /**
