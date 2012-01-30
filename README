@@ -1,0 +1,13 @@
+SETUP:
+* Create an api controller in you application (ApiController would be good)
+* in that controller set the $allowed_models array to contain what models you want accessible. These are not the class names, but the table name (ie WildfireContent would be wildfire_content)
+
+USAGE:
+* Visit http://sitename/api_controller/help for details
+* http://sitename/api_controller/model_table.format?query_string
+
+ADDING AUTH:
+* Basic auth is handled by checking for an "access" method on the model thats being used
+* If no method exists, then its allowed
+* If method exists, then value returned has to be evaulated to be true
+
