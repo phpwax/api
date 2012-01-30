@@ -269,7 +269,10 @@ class BaseApiController extends WaxController{
       $ret = array();
       if($model instanceof WaxModel){
         foreach($model->columns as $col_name => $col_data){
-          $data = $model->$col_name();
+          if($col_data[0] == "ManyToManyField" || $col_data[0] == "HasManyField"){
+            if($data = $model->$col_name) $data = $data->scope("api")->all();
+            else $data = array();
+          }else $data = $model->$col_name();
           if($data instanceof WaxModel || $data instanceof WaxRecordset) $ret[$col_name] = $this->wax_model_to_array($data, $recursion_check);
           else $ret[$col_name] = $data;
         }
