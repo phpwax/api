@@ -52,7 +52,7 @@ class BaseApiController extends WaxController{
       }else{
         $id = Request::param("id");
         $model = new $model_class($id);
-
+        $model = $model->scope("api");
         //separate post or get vars that exist on the model from ones that don't
         $params = array_merge(array_diff_key($_GET, array("route"=>0)), $_POST);
 
@@ -262,6 +262,7 @@ class BaseApiController extends WaxController{
    * @return array
    */
   public function wax_model_to_array($model, $recursion_check = array()){
+
     $class = get_class($model);
     $primval = $model->primval();
     if(!$recursion_check[$class][$primval]){
@@ -290,7 +291,7 @@ class BaseApiController extends WaxController{
    * reverse of above, saves data in the array back to the database
    */
   public function array_to_wax_model($array, $class){
-    $model = new $class;
+    $model = new $class("api");
     $matched_columns = array_intersect(array_keys($array), array_keys($model->columns)); //cut out cols in the data that don't match the cols on the model
 
     //if there are any column names matching at this level of the array, assume this level is a row. otherwise try multiple rows.
