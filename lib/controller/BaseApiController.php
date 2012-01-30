@@ -66,8 +66,9 @@ class BaseApiController extends WaxController{
 
         $col_params = array_intersect_key($params, $model->columns);
         unset($col_params[$model->primary_key]);
-        $allowed_params = array_merge($col_params, array_intersect_key($params, array_flip((array)$model->allowed_api_filters)));
-        WaxEvent::run("base.api.allowed_params", $allowed_params);
+        $this->allowed_params = array_merge($col_params, array_intersect_key($params, array_flip((array)$model->allowed_api_filters)));
+
+        WaxEvent::run("base.api.allowed_params", $this);
 
         //run access method on model if it exists
         if(WaxApplication::is_public_method($model, "access") && !($user = $this->run_method_if_exists($model, "access", array($params)))){
@@ -89,7 +90,7 @@ class BaseApiController extends WaxController{
           }elseif(!$model->primval()){ //GET or anything else
 
             //first apply relevant filters
-            foreach((array)$allowed_params as $name => $value){
+            foreach((array)$this->allowed_params as $name => $value){
               if(
                 !$this->run_method_if_exists($model, $name, array($value)) && //run param as a method on the model if that method is defined
                 in_array($name, array_keys($model->columns)) //if model method didn't exist for a param and it's a defined column, filter on it instead
