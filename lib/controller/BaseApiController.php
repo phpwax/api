@@ -117,8 +117,8 @@ class BaseApiController extends WaxController{
         }else $this->output_obj = $this->wax_model_to_array($model);
         if(!$this->output_obj['results']){
           $out = array();
-          $out['count'] = 1;
           $out['results'] = array($this->output_obj);
+          $out['count'] = count($out['results']);
           $this->output_obj = $out;
         }
       }
