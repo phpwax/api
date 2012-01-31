@@ -277,10 +277,12 @@ class BaseApiController extends WaxController{
     WaxEvent::run("base.api.wax_model_to_array", $model);
     $class = get_class($model);
     $primval = $model->primval();
+
+
     if(!$recursion_check[$class][$primval]){
-      $recursion_check[$class][$primval] = true;
       $ret = array();
       if($model instanceof WaxModel){
+        $recursion_check[$class][$primval] = true;
         foreach($model->columns as $col_name => $col_data){
           if($col_data[0] == "ManyToManyField" || $col_data[0] == "HasManyField"){
             if($data = $model->$col_name) $data = $data->scope("api")->all();
@@ -289,14 +291,15 @@ class BaseApiController extends WaxController{
           if($data instanceof WaxModel || $data instanceof WaxRecordset) $ret[$col_name] = $this->wax_model_to_array($data, $recursion_check);
           else $ret[$col_name] = $data;
         }
+        unset($recursion_check[$class][$primval]);
       }elseif($model instanceof WaxRecordset){
         $ret["count"] = $model->count();
         $ret["results"] = array();
         foreach($model as $row) $ret["results"][] = $this->wax_model_to_array($row, $recursion_check);
       }
-      unset($recursion_check[$class][$primval]);
+
       return $ret;
-      }
+    }
   }
 
   /**
