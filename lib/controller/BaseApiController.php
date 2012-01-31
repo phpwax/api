@@ -110,9 +110,17 @@ class BaseApiController extends WaxController{
       //prep for json output, might move this into the view at a later stage
       if($this->use_format == "json"){
         if($this->errors){
-          $this->output_obj = new stdClass;
-          $this->output_obj->errors = $this->errors;
+          $this->output_obj = array();
+          $this->output_obj['errors'] = $this->errors;
+          $this->output_obj['count'] = 0;
+          $this->output_obj['results'] = array();
         }else $this->output_obj = $this->wax_model_to_array($model);
+        if(!$this->output_obj['results']){
+          $out = array();
+          $out['count'] = 1;
+          $out['results'] = array($this->output_obj);
+          $this->output_obj = $out;
+        }
       }
 
     }
