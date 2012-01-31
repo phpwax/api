@@ -266,7 +266,7 @@ class BaseApiController extends WaxController{
    * @return array
    */
   public function wax_model_to_array($model, $recursion_check = array()){
-
+    WaxEvent::run("base.api.wax_model_to_array", $model);
     $class = get_class($model);
     $primval = $model->primval();
     if(!$recursion_check[$class][$primval]){
