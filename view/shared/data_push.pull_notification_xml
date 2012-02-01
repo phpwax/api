@@ -1,9 +1,0 @@
-<count><?=count($recordset)?></count>
-<endpoint><![CDATA[http<?=$_SERVER['HTTPS']?'s':''?>://<?=$_SERVER['HTTP_HOST']?>/api/<?=underscore(get_class($recordset->model))?>.xml]]></endpoint>
-<models>
-  <?foreach($recordset as $row):?>
-    <model>
-      <id><?=$row->primval()?></id>
-    </model>
-  <?endforeach?>
-</models>

@@ -1,8 +1,0 @@
-<count><?=count($recordset)?></count>
-<models>
-  <?foreach($recordset as $row):?>
-    <model>
-      <?=partial("model", array("row"=>$row, "recurse"=>true), "xml")?>
-    </model>
-  <?endforeach?>
-</models>
