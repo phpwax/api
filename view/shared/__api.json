@@ -1,0 +1,27 @@
+<?
+if(!$joins) $joins = array();
+
+$results = array();
+foreach($data as $i=>$item){
+  //this is an action on the model to return columns to be shown
+  $columns = $item->api_cols();
+  foreach($columns as $col){
+    $col_name = $item->get_col($col)->col_name;
+    if($item->columns[$col][0] == "ManyToManyField" || $item->columns[$col][0] == "HasManyField"){
+      if($joins[$col][$item->primval]) $results[$i][$col] = array();
+      else{
+        $joins[$col][$item->primval] = true;
+        $data = $item->$col->scope($api_scope)->all();
+        $count = $data->count();
+        $results[$i][$col] = array(
+                              'count'=>$count,
+                              'per_page'=>$count,
+                              'page'=>1,
+                              'results'=>json_decode(partial("__api", array('data'=>$data, 'api_scope'=>$api_scope, 'joins'=>$joins), "json"))
+                              );
+      }
+    }else $results[$i][$col] = $item->$col_name;
+  }
+}
+?>
+<?=json_encode($results);?>
