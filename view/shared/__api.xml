@@ -3,7 +3,7 @@ if(!$joins) $joins = array();
 foreach($data as $i=>$item){
   $endtag = $tag = strtolower(get_class($item));
   //this is an action on the model to return columns to be shown
-  $columns = $item->api_cols($model_class, $joins);
+  if(!$columns = $item->api_cols($model_class, $joins) ) $columns = array_keys($item->columns);
   echo "\r\n<$tag id='$item->primval'>\r\n";
   foreach($columns as $col){
     $col_name = $item->get_col($col)->col_name;
