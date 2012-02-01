@@ -4,7 +4,7 @@ if(!$joins) $joins = array();
 $results = array();
 foreach($data as $i=>$item){
   //this is an action on the model to return columns to be shown
-  $columns = $item->api_cols();
+  $columns = $item->api_cols($model_class, $joins);
   foreach($columns as $col){
     $col_name = $item->get_col($col)->col_name;
     if($item->columns[$col][0] == "ManyToManyField" || $item->columns[$col][0] == "HasManyField"){
@@ -15,7 +15,7 @@ foreach($data as $i=>$item){
         $count = $data->count();
         $results[$i][$col] = array(
                               'count'=>$count,
-                              'results'=>json_decode(partial("__api", array('data'=>$data, 'api_scope'=>$api_scope, 'joins'=>$joins), "json"))
+                              'results'=>json_decode(partial("__api", array('data'=>$data, 'api_scope'=>$api_scope, 'joins'=>$joins, 'model_class'=>$model_class), "json"))
                               );
       }
     }else $results[$i][$col] = $item->$col_name;

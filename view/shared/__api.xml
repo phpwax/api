@@ -1,26 +1,23 @@
 <?
 if(!$joins) $joins = array();
-
 foreach($data as $i=>$item){
+  $endtag = $tag = strtolower(get_class($item));
+  echo "\r\n<$tag id='$item->primval'>\r\n";
+
   //this is an action on the model to return columns to be shown
-  $columns = $item->api_cols();
+  $columns = $item->api_cols($model_class, $joins);
   foreach($columns as $col){
     $col_name = $item->get_col($col)->col_name;
     if($item->columns[$col][0] == "ManyToManyField" || $item->columns[$col][0] == "HasManyField"){
-      if($joins[$col][$item->primval]) $results[$i][$col] = array();
-      else{
+      if(!$joins[$col][$item->primval]){
         $joins[$col][$item->primval] = true;
         $data = $item->$col->scope($api_scope)->all();
         $count = $data->count();
-        echo "<$col>
-              <count>$count</count>
-              <results>
-                ".partial("__api", array('data'=>$data, 'api_scope'=>$api_scope, 'joins'=>$joins), "xml")."
-              </results>
-              </$col>
-              ";
+        $tag = strtolower($item->columns[$col][1]['taget_model']);
+        echo "\r\n  <$col>\r\n    <count>$count</count>\r\n    <results>\r\n".(partial("__api", array('data'=>$data, 'api_scope'=>$api_scope, 'joins'=>$joins, 'model_class'=>$model_class), "xml"))."</results>\r\n</$col>\r\n";
       }
-    }else echo "<$col>".$item->$col_name."</$col>";
+    }else echo "\r\n<$col>".(($item->columns[$col][0] == "TextField")? "<![CDATA[": "").$item->$col_name.(($item->columns[$col][0] == "TextField")? "]]>": "")."</$col>";
   }
+  echo "\r\n</$endtag>";
 }
 ?>
