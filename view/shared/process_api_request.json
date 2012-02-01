@@ -4,7 +4,7 @@
   per_page: <?=$per_page?>,
   page: <?=$this_page?>,
   start: <?=date("Y-m-d H:i:s", $start)?>,
-  results: <?=(partial("__api", array('data'=>$results, 'api_scope'=>$api_scope), "json"))?>
+  results: <?=(partial("__api", array('data'=>$results, 'api_scope'=>$api_scope), "json"))?>,
   end: <?$end = time(); echo date("Y-m-d H:i:s", $end)?>,
   time: <?=($end-$start)?>
 }
