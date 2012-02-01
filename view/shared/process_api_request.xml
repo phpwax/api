@@ -1,0 +1,10 @@
+<?$start = time();?>
+<<?=$model_class?>>
+  <count><?=(($results->total_without_limits())?$results->total_without_limits() : $results->count() )?></count>
+  <per_page><?=$per_page?></per_page>
+  <page><?=$this_page?></page>
+  <start><?=date("Y-m-d H:i:s", $start)?></start>
+  <results><?=(partial("__api", array('data'=>$results, 'api_scope'=>$api_scope), "xml"))?></results>
+  <end><?$end = time(); echo date("Y-m-d H:i:s", $end)?></end>
+  <time><?=($end-$start)?></time>
+</<?=$model_class?>>
