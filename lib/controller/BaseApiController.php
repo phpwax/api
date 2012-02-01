@@ -2,7 +2,8 @@
 class BaseApiController extends WaxController{
 
   public $allowed_models = array();
-  public $allowed_formats = array("json");
+  public $allowed_formats = array("json", "xml");
+  public $header_types = array('json'=>'application/javascript', 'xml'=>'application/xml')
   public $model_class = false;
   public $model = false;
   public $api_scope = "api";
@@ -11,6 +12,7 @@ class BaseApiController extends WaxController{
   public $column_map = array();
 
   public function controller_global(){
+    if($header = $this->header_types[$this->use_format]) header("Content-Type: $header");
     if(!in_array($this->action, $this->allowed_models)) throw new WXRoutingException('The model you are looking for is not available', "Model not found", '404');
     elseif($this->model_class = Inflections::camelize($this->action, true)) $this->model = new $this->model_class;
     else throw new WXRoutingException('Error', "Model Error", '404');
