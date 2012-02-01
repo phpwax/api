@@ -15,8 +15,6 @@ foreach($data as $i=>$item){
         $count = $data->count();
         $results[$i][$col] = array(
                               'count'=>$count,
-                              'per_page'=>$count,
-                              'page'=>1,
                               'results'=>json_decode(partial("__api", array('data'=>$data, 'api_scope'=>$api_scope, 'joins'=>$joins), "json"))
                               );
       }
