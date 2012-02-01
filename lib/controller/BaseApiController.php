@@ -3,7 +3,7 @@ class BaseApiController extends WaxController{
 
   public $allowed_models = array();
   public $allowed_formats = array("json", "xml");
-  public $header_types = array('json'=>'application/javascript', 'xml'=>'application/xml')
+  public $header_types = array('json'=>'application/javascript', 'xml'=>'application/xml');
   public $model_class = false;
   public $model = false;
   public $api_scope = "api";
