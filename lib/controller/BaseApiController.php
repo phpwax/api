@@ -113,7 +113,7 @@ class BaseApiController extends WaxController{
 
       foreach($values as $k => $v) $model->$k = $v;
       if(!$model->save()) continue;
-      foreach($associations as $k => $v) $model->$k = $this->process_api_write($v, new $model->columns[$k][1]["target_model"]);
+      foreach($associations as $k => $v) $model->$k = $this->write_model($v, new $model->columns[$k][1]["target_model"]);
 
       $rowset[] = $model->row;
     }
