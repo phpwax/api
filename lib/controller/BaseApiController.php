@@ -80,7 +80,7 @@ class BaseApiController extends WaxController{
     return $model->filter($model->primary_key, $primaries);
   }
 
-  public function filter_has_many($model, $col, $values){
+  protected function filter_has_many($model, $col, $values){
     if(!is_array($values)) $values = array($values);
     $target_class = $model->columns[$col][1]['target_model'];
     $target = new $target_class;
