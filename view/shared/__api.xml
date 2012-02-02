@@ -4,7 +4,7 @@ foreach($data as $i=>$item){
   $endtag = $tag = strtolower(get_class($item));
   //this is an action on the model to return columns to be shown
   if(!$columns = $item->api_cols($model_class, $joins) ) $columns = array_keys($item->columns);
-  echo "\r\n<$tag id='$item->primval'>\r\n";
+  echo "\r\n<$tag>\r\n";
   foreach($columns as $col){
     $col_name = $item->get_col($col)->col_name;
     if($item->columns[$col][0] == "ManyToManyField" || $item->columns[$col][0] == "HasManyField"){
