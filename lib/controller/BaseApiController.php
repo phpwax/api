@@ -20,7 +20,8 @@ class BaseApiController extends WaxController{
     //set format
     if(!$this->use_format) $this->use_format = $this->allowed_formats[0];
     //set view - use cms view
-    $this->action = "process_api_request";
+    if($_SERVER['REQUEST_METHOD'] == "POST" || $_SERVER['REQUEST_METHOD'] == "PUT") $this->action = "process_api_write";
+    else $this->action = "process_api_request";
     $this->use_view = "process_api_request";
   }
 
@@ -38,6 +39,11 @@ class BaseApiController extends WaxController{
     if($page = Request::param('page')) $this->this_page = $page;
     $this->results = $this->model->page($this->this_page, $this->per_page);
 
+  }
+
+  //parse incoming data and write out to the model, reverse of process_api_request
+  public function process_api_write(){
+    $this->results = $this->write_model(json_decode(file_get_contents('php://input'), 1), $this->model);
   }
 
 
@@ -88,6 +94,30 @@ class BaseApiController extends WaxController{
     $ids = array(0);
     foreach($target->filter($model_join_col, $values)->all() as $row) $ids[] = $row->primval;
     return $model->filter($model->primary_key, $ids);
+  }
+
+  /**
+   * write from array based data into waxmodels
+   * handles multilevel arrays by recursion
+   * expects data[results] sub array with a set of models
+   * returns WaxRecordSet of successfully saved models
+   */
+  protected function write_model($data, WaxModel $empty_model){
+    $rowset = array();
+    foreach($data["results"] as $result){
+      $model = clone $empty_model;
+
+      //save associations after values to handle new rows correctly
+      $associations = array_intersect_key($result, $model->associations());
+      $values = array_diff_key($result, $associations);
+
+      foreach($values as $k => $v) $model->$k = $v;
+      if(!$model->save()) continue;
+      foreach($associations as $k => $v) $model->$k = $this->process_api_write($v, new $model->columns[$k][1]["target_model"]);
+
+      $rowset[] = $model->row;
+    }
+    return new WaxRecordSet($empty_model, $rowset);
   }
 }
 ?>
