@@ -10,6 +10,7 @@ class BaseApiController extends WaxController{
   public $per_page = 50;
   public $this_page = 1;
   public $column_map = array();
+  public $errors = array();
 
   public function controller_global(){
     if($header = $this->header_types[$this->use_format]) header("Content-Type: $header");
@@ -44,8 +45,12 @@ class BaseApiController extends WaxController{
   //parse incoming data and write out to the model, reverse of process_api_request
   public function process_api_write(){
     $data = file_get_contents('php://input');
-    if($this->use_format == "xml") $data = json_encode(simplexml_load_string($data));
-    $this->results = $this->write_model(json_decode($data, 1), $this->model);
+    if($this->use_format == "xml"){
+      libxml_use_internal_errors(1);
+      $data = json_encode(simplexml_load_string($data));
+      if($errors = libxml_get_errors()) $this->errors[] = array("type"=>"xml parse", "error"=>$errors);
+    }
+    if($data) $this->results = $this->write_model(json_decode($data, 1), $this->model);
   }
 
 
@@ -109,12 +114,23 @@ class BaseApiController extends WaxController{
     foreach($data["results"] as $result){
       $model = clone $empty_model;
 
+      //don't accept columns that aren't defined on the model
+      $results = array_diff_key($results, $model->columns);
+
       //save associations after values to handle new rows correctly
       $associations = array_intersect_key($result, $model->associations());
       $values = array_diff_key($result, $associations);
 
       foreach($values as $k => $v) $model->$k = $v;
-      if(!$model->save()) continue;
+      if(!$model->save()){
+        $this->errors[] = array(
+          "type" => "model validation"
+          "model" => get_class($model),
+          "errors" => $model->errors,
+          "data" => $result
+        );
+        continue;
+      }
       foreach($associations as $k => $v) $model->$k = $this->write_model($v, new $model->columns[$k][1]["target_model"]);
 
       $rowset[] = $model->row;
