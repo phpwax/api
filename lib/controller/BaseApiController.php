@@ -35,10 +35,9 @@ class BaseApiController extends WaxController{
     //apply filters to the model based on their type
     foreach($filter_keys as $column=>$values) $this->model = $this->filter_model($this->model, $column, $values);
     //find results
-    if($page = Request::param('page')){
-      $this->this_page = $page;
-      $this->results = $this->model->page($page,$this->per_page);
-    }else $this->results = $this->model->all();
+    if($per_page = Request::param('per_page')) $this->per_page = $per_page;
+    if($page = Request::param('page')) $this->this_page = $page;
+    $this->results = $this->model->page($this->this_page, $this->per_page);
 
   }
 
