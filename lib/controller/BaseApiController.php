@@ -43,7 +43,9 @@ class BaseApiController extends WaxController{
 
   //parse incoming data and write out to the model, reverse of process_api_request
   public function process_api_write(){
-    $this->results = $this->write_model(json_decode(file_get_contents('php://input'), 1), $this->model);
+    $data = file_get_contents('php://input');
+    if($this->use_format == "xml") $data = json_encode(simplexml_load_string($data));
+    $this->results = $this->write_model(json_decode($data, 1), $this->model);
   }
 
 
