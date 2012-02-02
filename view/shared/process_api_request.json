@@ -1,8 +1,14 @@
-<?$start = microtime();?>
+<?
+  $start = microtime();
+  $is_paged = $results instanceof WaxPaginatedRecordset;
+?>
 {
-  "count": <?=(($results->total_without_limits())?$results->total_without_limits() : $results->count() )?>,
+  "count": <?=$is_paged ? $results->total_without_limits() : $results->count()?>,
+  <?if($is_paged):?>
   "per_page": <?=$per_page?>,
   "page": <?=$this_page?>,
+  "total_pages": <?=$results->total_pages?>,
+  <?endif?>
   "start": "<?=date("Y-m-d H:i:s", time())?>",
   "results": <?=(partial("__api", array('data'=>$results, 'api_scope'=>$api_scope, 'model_class'=>$model_class), "json"))?>,
   "end": "<?$end = microtime(); echo date("Y-m-d H:i:s", time())?>",
