@@ -100,7 +100,7 @@ class BaseApiController extends WaxController{
    * write from array based data into waxmodels
    * handles multilevel arrays by recursion
    * expects data[results] sub array with a set of models
-   * returns WaxRecordSet of successfully saved models
+   * returns WaxRecordset of successfully saved models
    */
   protected function write_model($data, WaxModel $empty_model){
     $rowset = array();
@@ -117,7 +117,7 @@ class BaseApiController extends WaxController{
 
       $rowset[] = $model->row;
     }
-    return new WaxRecordSet($empty_model, $rowset);
+    return new WaxRecordset($empty_model, $rowset);
   }
 }
 ?>
