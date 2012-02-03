@@ -124,7 +124,7 @@ class BaseApiController extends WaxController{
       foreach($values as $k => $v) $model->$k = $v;
       if(!$model->save()){
         $this->errors[] = array(
-          "type" => "model validation"
+          "type" => "model validation",
           "model" => get_class($model),
           "errors" => $model->errors,
           "data" => $result
