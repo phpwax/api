@@ -11,6 +11,9 @@
   <?endif?>
   "start": "<?=date("Y-m-d H:i:s", time())?>",
   "results": <?=(partial("__api", array('data'=>$results, 'api_scope'=>$api_scope, 'model_class'=>$model_class), "json"))?>,
+  <?if($errors):?>
+  "errors": <?=json_encode($errors)?>,
+  <?endif?>
   "end": "<?$end = microtime(); echo date("Y-m-d H:i:s", time())?>",
   "time": <?=($end-$start)?>
 }
