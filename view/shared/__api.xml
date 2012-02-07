@@ -1,20 +1,29 @@
 <?
-if(!$joins) $joins = array();
 foreach($data as $i=>$item){
   $endtag = $tag = strtolower(get_class($item));
   //this is an action on the model to return columns to be shown
-  if(!$columns = $item->api_cols($model_class, $joins) ) $columns = array_keys($item->columns);
+  if(!$columns = $item->api_cols($model_class, $recursion) ) $columns = array_keys($item->columns);
   echo "\r\n<$tag>\r\n";
   foreach($columns as $col){
-    $col_name = $item->get_col($col)->col_name;
-    if($item->columns[$col][0] == "ManyToManyField" || $item->columns[$col][0] == "HasManyField"){
-      if(!$joins[$col][$item->primval]){
-        $joins[$col][$item->primval] = true;
-        $data = $item->$col->scope($api_scope)->all();
-        $count = $data->count();
-        $tag = strtolower($item->columns[$col][1]['taget_model']);
-        echo "\r\n  <$col>\r\n    <count>$count</count>\r\n    <results>\r\n".(partial("__api", array('data'=>$data, 'api_scope'=>$api_scope, 'joins'=>$joins, 'model_class'=>$model_class), "xml"))."</results>\r\n</$col>\r\n";
-        unset($joins[$col][$item->primval]);
+    $col_obj = $item->get_col($col);
+    $col_name = $col_obj->col_name;
+    $col_type = $item->columns[$col][0];
+    if(in_array($col_type, array("ManyToManyField", "HasManyField", "ForeignKey"))){
+      $col_target = $col_obj->target_model;
+      //only recurse on models that aren't already in the recursion stack, skip if they are. i.e. a -> b won't go back to a again
+      if(!in_array($col_target, $recursion)){
+        $data = array();
+        $count = 0;
+        if($col_type == "ForeignKey" && ($for = $item->$col) && ($for = $for->scope($api_scope)->first())){
+          $data[] = $for;
+          $count = 1;
+        }elseif($col_type != "ForeignKey"){
+          $data = $item->$col->scope($api_scope)->all();
+          $count = $data->count();
+        }
+        $recursion[] = $col_target;
+        echo "\r\n  <$col>\r\n    <count>$count</count>\r\n    <results>\r\n".(partial("__api", array('data'=>$data, 'api_scope'=>$api_scope, 'joins'=>$joins, 'model_class'=>$model_class, 'recursion'=>$recursion), "xml"))."</results>\r\n</$col>\r\n";
+        array_pop($recursion);
       }
     }else echo "\r\n<$col>".(($item->columns[$col][0] == "TextField")? "<![CDATA[": "").$item->$col_name.(($item->columns[$col][0] == "TextField")? "]]>": "")."</$col>";
   }
