@@ -1,5 +1,5 @@
 <?
-  $start = microtime();
+  $start = microtime(1);
   $is_paged = $results instanceof WaxPaginatedRecordset;
 ?>
 <Doc>
@@ -11,6 +11,9 @@
   <?endif?>
   <start><?=date("Y-m-d H:i:s", time())?></start>
   <results><?=trim(partial("__api", array('data'=>$results, 'api_scope'=>$api_scope, 'model_class'=>$model_class), "xml"))?></results>
-  <end><?$end = microtime(); echo date("Y-m-d H:i:s", time())?></end>
+  <?if($errors):?>
+  <errors><?=partial("__array", array("data"=>$errors, "previous_key"=>"error"), "xml")?></errors>
+  <?endif?>
+  <end><?$end = microtime(1); echo date("Y-m-d H:i:s", time())?></end>
   <time><?=($end-$start)?></time>
 </Doc>

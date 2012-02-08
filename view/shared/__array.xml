@@ -1,0 +1,9 @@
+<?
+foreach($data as $key => $value){
+  if(is_numeric($key)) $key = $previous_key;
+  echo "\r\n<$key>";
+  if(is_array($value)) echo partial("__array", array("data"=>$value, "previous_key"=>$key), "xml");
+  else echo $value;
+  echo "</$key>\r\n";
+}
+?>
