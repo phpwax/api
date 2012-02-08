@@ -53,7 +53,7 @@ class BaseApiController extends WaxController{
     }
     $parsed = json_decode($data, 1);
     if($parsed === null) $this->errors[] = array("type"=>"json parse", "error"=>json_last_error());
-    elseif($data) $this->results = $this->write_model($parsed, $this->model);
+    else $this->results = $this->write_model($parsed, $this->model);
   }
 
 
@@ -114,11 +114,16 @@ class BaseApiController extends WaxController{
    */
   protected function write_model($data, WaxModel $empty_model){
     $rowset = array();
-    foreach($data["results"] as $result){
+    $results = $data["results"];
+
+    //hack for xml input result sets: our xml->json->array hack above means that incoming arrays in xml aren't encoded "right"
+    if(is_numeric(reset(array_keys(reset($results))))) $results = reset($results);
+
+    foreach($results as $result){
       $model = clone $empty_model;
 
       //don't accept columns that aren't defined on the model
-      $results = array_diff_key($results, $model->columns);
+      $result = array_intersect_key($result, $empty_model->columns);
 
       //save associations after values to handle new rows correctly
       $associations = array_intersect_key($result, $model->associations());
