@@ -50,7 +50,9 @@ class BaseApiController extends WaxController{
       $data = json_encode(simplexml_load_string($data));
       if($errors = libxml_get_errors()) $this->errors[] = array("type"=>"xml parse", "error"=>$errors);
     }
-    if($data) $this->results = $this->write_model(json_decode($data, 1), $this->model);
+    $parsed = json_decode($data, 1);
+    if($parsed === null) $this->errors[] = array("type"=>"json parse", "error"=>json_last_error());
+    elseif($data) $this->results = $this->write_model($parsed, $this->model);
   }
 
 
