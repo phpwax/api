@@ -113,7 +113,12 @@ class BaseApiController extends WaxController{
    */
   protected function write_model($data, WaxModel $empty_model){
     $rowset = array();
-    foreach($data["results"] as $result){
+    $results = $data["results"];
+
+    //hack for xml input result sets: our xml->json->array hack above means that incoming arrays in xml aren't encoded "right"
+    if(is_numeric(reset(array_keys(reset($results))))) $results = reset($results);
+
+    foreach($results as $result){
       $model = clone $empty_model;
 
       //don't accept columns that aren't defined on the model
