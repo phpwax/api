@@ -52,7 +52,7 @@ class BaseApiController extends WaxController{
     }
     $parsed = json_decode($data, 1);
     if($parsed === null) $this->errors[] = array("type"=>"json parse", "error"=>json_last_error());
-    elseif($data) $this->results = $this->write_model($parsed, $this->model);
+    else $this->results = $this->write_model($parsed, $this->model);
   }
 
 
