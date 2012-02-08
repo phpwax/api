@@ -48,7 +48,7 @@ class BaseApiController extends WaxController{
     if($this->use_format == "xml"){
       libxml_use_internal_errors(1);
       $data = json_encode(simplexml_load_string($data));
-      if($errors = libxml_get_errors()) $this->errors[] = array("type"=>"xml parse", "error"=>$errors);
+      if($errors = libxml_get_errors()) $this->errors[] = array("type"=>"xml parse", "details"=>json_decode(json_encode($errors), 1));
     }
     $parsed = json_decode($data, 1);
     if($parsed === null) $this->errors[] = array("type"=>"json parse", "error"=>json_last_error());
@@ -128,7 +128,7 @@ class BaseApiController extends WaxController{
         $this->errors[] = array(
           "type" => "model validation",
           "model" => get_class($model),
-          "errors" => $model->errors,
+          "details" => $model->errors,
           "data" => $result
         );
         continue;
