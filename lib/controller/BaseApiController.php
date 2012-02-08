@@ -117,7 +117,7 @@ class BaseApiController extends WaxController{
       $model = clone $empty_model;
 
       //don't accept columns that aren't defined on the model
-      $results = array_diff_key($results, $model->columns);
+      $result = array_diff_key($result, $model->columns);
 
       //save associations after values to handle new rows correctly
       $associations = array_intersect_key($result, $model->associations());
