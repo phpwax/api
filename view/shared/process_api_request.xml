@@ -3,14 +3,16 @@
   $is_paged = $results instanceof WaxPaginatedRecordset;
 ?>
 <Doc>
-  <count><?=$is_paged ? $results->total_without_limits() : $results->count()?></count>
-  <?if($is_paged):?>
-  <per_page><?=$per_page?></per_page>
-  <page><?=$this_page?></page>
-  <total_pages><?=$results->total_pages?></total_pages>
-  <?endif?>
   <start><?=date("Y-m-d H:i:s", time())?></start>
-  <results><?=trim(partial("__api", array('data'=>$results, 'api_scope'=>$api_scope, 'model_class'=>$model_class), "xml"))?></results>
+  <?if($results):?>
+    <count><?=$is_paged ? $results->total_without_limits() : $results->count()?></count>
+    <?if($is_paged):?>
+      <per_page><?=$per_page?></per_page>
+      <page><?=$this_page?></page>
+      <total_pages><?=$results->total_pages?></total_pages>
+    <?endif?>
+    <results><?=trim(partial("__api", array('data'=>$results, 'api_scope'=>$api_scope, 'model_class'=>$model_class, 'recursion'=>array(get_class($results->model))), "xml"))?></results>
+  <?endif?>
   <?if($errors):?>
   <errors><?=partial("__array", array("data"=>$errors, "previous_key"=>"error"), "xml")?></errors>
   <?endif?>
