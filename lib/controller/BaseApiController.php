@@ -126,9 +126,17 @@ class BaseApiController extends WaxController{
       $result = array_intersect_key($result, $empty_model->columns);
 
       //save associations after values to handle new rows correctly
-      $associations = array_intersect_key($result, $model->associations());
+      //including foreign keys as associations to be handled similarly to hasmany/manytomany
+      foreach($model->columns as $column => $data){
+        $type = $data[0];
+        if(($type == "HasManyField" || $type == "ManyToManyField" || $type == "ForeignKey")) $model_associations[$column] = $data;
+      }
+
+      $associations = array_intersect_key($result, $model_associations);
       $values = array_diff_key($result, $associations);
+
       foreach($values as $k => $v) $model->$k = $v;
+
       if(!$model->save()){
         $this->errors[] = array(
           "type" => "model validation",
@@ -138,7 +146,14 @@ class BaseApiController extends WaxController{
         );
         continue;
       }
-      foreach($associations as $k => $v) $model->$k = $this->write_model($v, new $model->columns[$k][1]["target_model"]($this->api_scope));
+
+      foreach($associations as $k => $v){
+        if($model->columns[$k][1]["target_model"]){
+          $ret = $this->write_model($v, new $model->columns[$k][1]["target_model"]($this->api_scope));
+          if($model->columns[$k][0] == "ForeignKey") $ret = $ret[0]; //dereference foreign keys by grabbing the first one returned, if multiple are posted on the first will write
+          $model->$k = $ret;
+        }
+      }
 
       $rowset[] = $model->row;
     }
