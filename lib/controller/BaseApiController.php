@@ -127,7 +127,6 @@ class BaseApiController extends WaxController{
       //save associations after values to handle new rows correctly
       $associations = array_intersect_key($result, $model->associations());
       $values = array_diff_key($result, $associations);
-
       foreach($values as $k => $v) $model->$k = $v;
       if(!$model->save()){
         $this->errors[] = array(
@@ -138,7 +137,7 @@ class BaseApiController extends WaxController{
         );
         continue;
       }
-      foreach($associations as $k => $v) $model->$k = $this->write_model($v, new $model->columns[$k][1]["target_model"]);
+      foreach($associations as $k => $v) $model->$k = $this->write_model($v, new $model->columns[$k][1]["target_model"]($this->api_scope));
 
       $rowset[] = $model->row;
     }
