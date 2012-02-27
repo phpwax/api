@@ -135,7 +135,10 @@ class BaseApiController extends WaxController{
       $associations = array_intersect_key($result, $model_associations);
       $values = array_diff_key($result, $associations);
 
-      foreach($values as $k => $v) $model->$k = $v;
+      foreach($values as $k => $v){
+        if(is_array($v) && !$v) $v = null; // hack for empty xml values that the xml->json->array hack above makes as empty arrays
+        $model->$k = $v;
+      }
 
       if(!$model->save()){
         $this->errors[] = array(
