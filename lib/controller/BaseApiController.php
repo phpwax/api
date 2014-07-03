@@ -137,6 +137,8 @@ class BaseApiController extends WaxController{
 
       foreach($values as $k => $v){
         if(is_array($v) && !$v) $v = null; // hack for empty xml values that the xml->json->array hack above makes as empty arrays
+        if(strtolower($v)=='false') $v=0;
+        if(strtolower($v)=='true') $v=1;
         $model->$k = $v;
       }
 
