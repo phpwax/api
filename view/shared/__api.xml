@@ -8,7 +8,7 @@ foreach($data as $i=>$item){
     $col_obj = $item->get_col($col);
     $col_name = $col_obj->col_name;
     $col_type = $item->columns[$col][0];
-    if(in_array($col_type, array("ManyToManyField", "HasManyField", "ForeignKey"))){
+    if(in_array($col_type, array("ManyToManyField", "HasManyField", "ForeignKey")) && $flat===false){
       $col_target = $col_obj->target_model;
       //only recurse on models that aren't already in the recursion stack, skip if they are. i.e. a -> b won't go back to a again
       if(!in_array($col_target, $recursion)){

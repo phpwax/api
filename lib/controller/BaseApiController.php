@@ -11,6 +11,8 @@ class BaseApiController extends WaxController{
   public $this_page = 1;
   public $column_map = array();
   public $errors = array();
+  public $flat_models = array();
+  public $flat_mode = false;
 
   public function controller_global(){
     set_time_limit(0);
@@ -54,6 +56,11 @@ class BaseApiController extends WaxController{
     $parsed = json_decode($data, 1);
     if($parsed === null) $this->errors[] = array("type"=>"json parse", "error"=>json_last_error());
     else $this->results = $this->write_model($parsed, $this->model);
+    
+    // Specify flat mode if applicable
+    if (in_array($this->action, $this->flat_models)) {
+        $this->flat_mode = true;
+    }
   }
 
 
@@ -112,57 +119,59 @@ class BaseApiController extends WaxController{
    * expects data[results] sub array with a set of models
    * returns WaxRecordset of successfully saved models
    */
-  protected function write_model($data, WaxModel $empty_model){
-    $rowset = array();
-    $results = $data["results"];
+    protected function write_model($data, WaxModel $empty_model){
+        $rowset = array();
+        $results = $data["results"];
 
-    //hack for xml input result sets: our xml->json->array hack above means that incoming arrays in xml aren't encoded "right"
-    if(is_numeric(reset(array_keys(reset($results))))) $results = reset($results);
-
-    foreach($results as $result){
-      $model = clone $empty_model;
-
-      //don't accept columns that aren't defined on the model
-      $result = array_intersect_key($result, $empty_model->columns);
-
-      //save associations after values to handle new rows correctly
-      //including foreign keys as associations to be handled similarly to hasmany/manytomany
-      foreach($model->columns as $column => $data){
-        $type = $data[0];
-        if(($type == "HasManyField" || $type == "ManyToManyField" || $type == "ForeignKey")) $model_associations[$column] = $data;
-      }
-
-      $associations = array_intersect_key($result, $model_associations);
-      $values = array_diff_key($result, $associations);
-
-      foreach($values as $k => $v){
-        if(is_array($v) && !$v) $v = null; // hack for empty xml values that the xml->json->array hack above makes as empty arrays
-        if(strtolower($v)=='false') $v=0;
-        if(strtolower($v)=='true') $v=1;
-        $model->$k = $v;
-      }
-
-      if(!$model->save()){
-        $this->errors[] = array(
-          "type" => "model validation",
-          "model" => get_class($model),
-          "details" => $model->errors,
-          "data" => $result
-        );
-        continue;
-      }
-
-      foreach($associations as $k => $v){
-        if($model->columns[$k][1]["target_model"]){
-          $ret = $this->write_model($v, new $model->columns[$k][1]["target_model"]($this->api_scope));
-          if($model->columns[$k][0] == "ForeignKey") $ret = $ret[0]; //dereference foreign keys by grabbing the first one returned, if multiple are posted on the first will write
-          $model->$k = $ret;
+        //hack for xml input result sets: our xml->json->array hack above means that incoming arrays in xml aren't encoded "right"
+        if (is_numeric(reset(array_keys(reset($results))))) {
+            $results = reset($results);
         }
-      }
+        
+        foreach($results as $result){
+            $model = clone $empty_model;
 
-      $rowset[] = $model->row;
+            //don't accept columns that aren't defined on the model
+            $result = array_intersect_key($result, $empty_model->columns);
+
+            //save associations after values to handle new rows correctly
+            //including foreign keys as associations to be handled similarly to hasmany/manytomany
+            foreach($model->columns as $column => $data){
+                $type = $data[0];
+                if(($type == "HasManyField" || $type == "ManyToManyField" || $type == "ForeignKey")) $model_associations[$column] = $data;
+            }
+
+            $associations = array_intersect_key($result, $model_associations);
+            $values = array_diff_key($result, $associations);
+            
+
+            foreach($values as $k => $v){
+                if(is_array($v) && !$v) $v = null; // hack for empty xml values that the xml->json->array hack above makes as empty arrays
+                if(strtolower($v)=='false') $v=0;
+                if(strtolower($v)=='true') $v=1;
+                $model->$k = $v;
+            }
+
+            if(!$model->save()){
+                $this->errors[] = array(
+                  "type" => "model validation",
+                  "model" => get_class($model),
+                  "details" => $model->errors,
+                  "data" => $result
+                );
+                continue;
+            }
+
+            foreach($associations as $k => $v){
+                if($model->columns[$k][1]["target_model"]){
+                    $ret = $this->write_model($v, new $model->columns[$k][1]["target_model"]($this->api_scope));
+                    if($model->columns[$k][0] == "ForeignKey") $ret = $ret[0]; //dereference foreign keys by grabbing the first one returned, if multiple are posted on the first will write
+                    $model->$k = $ret;
+                }
+            }
+
+            $rowset[] = $model->row;
+        }
+        return new WaxRecordset($empty_model, $rowset);
     }
-    return new WaxRecordset($empty_model, $rowset);
-  }
 }
-?>
