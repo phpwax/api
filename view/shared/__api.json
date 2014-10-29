@@ -8,14 +8,14 @@ foreach($data as $i=>$item){
   foreach($columns as $col){
     $col_name = $item->get_col($col)->col_name;
     if($item->columns[$col][0] == "ManyToManyField" || $item->columns[$col][0] == "HasManyField"){
-      if($joins[$col][$item->primval]) $results[$i][$col] = array();
+      if($joins[$col][$item->primval] || $last) $results[$i][$col] = array();
       else{
         $joins[$col][$item->primval] = true;
         $data = $item->$col->scope($api_scope)->all();
         $count = $data->count();
         $results[$i][$col] = array(
                               'count'=>$count,
-                              'results'=>json_decode(partial("__api", array('data'=>$data, 'api_scope'=>$api_scope, 'joins'=>$joins, 'model_class'=>$model_class), "json"))
+                              'results'=>json_decode(partial("__api", array('data'=>$data, 'api_scope'=>$api_scope, 'joins'=>$joins, 'model_class'=>$model_class, 'last'=>true), "json"))
                               );
       }
     }else $results[$i][$col] = $item->$col_name;
